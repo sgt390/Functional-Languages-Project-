@@ -48,16 +48,6 @@ parseScDef = do v <- parseVar
                 body <- parseExpr -- call to parseExpr
                 return (v, pf, body)
 
-{--TODO
-/character
-/parseVar
-/parseExpr  - let letrec case lambda aexpr
-parseDef -  Def (let and letrec)
-parseAlt -  Alter (case)
-/parseAExpr - Aexpr
---}
-
-
 parseVar :: Parser (Expr Name)
 parseVar = do i <- identifier
               return (EVar i)
@@ -67,10 +57,8 @@ character xs = symbol xs
 
 
 parseExpr :: Parser (Expr Name)
-parseExpr = do 
-              appl <- parseAppl
-              return (appl)
-           do brec <- parseBrec
+parseExpr = do
+              brec <- parseBrec
               defs <- parseDefs
               character "in"
               expr <- parseExpr
@@ -86,8 +74,8 @@ parseExpr = do
               symbol "."
               expr <- parseExpr
               return (Elam (v:vs) expr)
-       <|> do expr <- parseAExpr
-              return expr
+       <|> do expr1 <- parseExpr1 -- include aexpr in this
+              return expr1
 
 
 parseAExpr :: Parser (Expr Name)
@@ -146,4 +134,55 @@ parseNum :: Parser (Expr ENum)
 parseNum = do num <- integer
               return (ENum num)
 
-parseAppl :: Parser (Expr TODO)
+parseExpr1 :: Parser (Expr Name)
+parseExpr1 = do expr2 <- ParseExpr2
+                do character "|"
+                   expr1 <- ParseExpr1
+                   return (buildReturn "|" expr2 expr1)
+                 <|> return expr2
+
+parseExpr2 :: Parser (Expr Name)
+parseExpr2 = do expr3 <- parseExpr3
+                do chracter "&"
+                   expr2 <- parseExpr2
+                   return (buildReturn "&" expr3 expr2)
+                 <|> return expr3
+
+parseExpr3 :: Parse (Expr Name)
+parseExpr3 = do expr4a <- parseExpr4
+                do op <- parseRelop
+                   expr4b <- parseExpr4
+                   return (EAp (Eap op expr4a) Expr4b) -- !
+                 <|> return expr4a
+
+parseExpr4 :: Parse (Expr Name)
+parseExpr4 = do expr5 <- ParseExpr5
+                do chracter "+"
+                   expr4 <- parseExpr4
+                   return (buildReturn "+" Expr5 Expr4)
+                 <|> do 
+                      character "-"
+                      expr5b <- parseExpr5
+                      return (buildReturn "-" Expr5 expr5b)
+                 <|> return expr5
+
+parseExpr5 :: Parse (Expr Name)
+parseExpr5 = do expr6 <- parseExpr6
+                do character "*"
+                   expr5 <- parseExpr5
+                   return (buildReturn "*" expr6 expr5)
+                 <|> do character "/"
+                        expr6b <- parseExpr6
+                        return (buildReturn "/" expr6 expr6b)
+                 <|> return expr6
+
+parseExpr6 :: Parse (Expr Name)
+parseExpr6 = do aexprs <- some parseAExpr
+                return #TODO function to EAp each thing -- #TODO
+
+#TODO distinguish variables from keywords
+coreKeywords = ["in", "of", "let", "where"]
+
+buildReturn Name -> Expr -> Expr -> Expr
+buildReturn op e1 e2 = (EAp (EAp (EVar op) e1) e2)
+

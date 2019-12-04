@@ -49,7 +49,9 @@ parseScDef = do v <- identifier
 
 parseVar :: Parser (Expr Name)
 parseVar = do i <- identifier
-              return (EVar i)
+              if not (elem i coreKeywords)
+                     then return (EVar i)
+                     else empty
 
 character :: Name -> Parser Name
 character xs = symbol xs

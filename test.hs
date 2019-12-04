@@ -18,7 +18,7 @@ main = do inp <- readF
 comp :: [( Program Name, Name)] -> Program Name
 comp [] = error "no parse"
 comp [(e, [])] = e
-comp [(x, a)] = error ("doesn't use all input " ++ (show x) ++ "xxxxxxxx" ++ a)
+comp [(x, a)] = error ("doesn't use all input " ++ (show x) ++ "-----" ++ a)
 
 readloop inh = do ineof <- hIsEOF inh
                   if ineof

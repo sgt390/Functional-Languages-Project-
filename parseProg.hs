@@ -1,4 +1,3 @@
-
 module ParseProg where
 import Parse
 import Control.Applicative
@@ -148,14 +147,14 @@ parseExpr2 = do expr3 <- parseExpr3
                    return (buildReturn "&" expr3 expr2)
                  <|> return expr3
 
-parseExpr3 :: Parse (Expr Name)
+parseExpr3 :: Parser (Expr Name)
 parseExpr3 = do expr4a <- parseExpr4
                 do op <- parseRelop
                    expr4b <- parseExpr4
                    return (EAp (Eap op expr4a) Expr4b) -- !
                  <|> return expr4a
 
-parseExpr4 :: Parse (Expr Name)
+parseExpr4 :: Parser (Expr Name)
 parseExpr4 = do expr5 <- ParseExpr5
                 do chracter "+"
                    expr4 <- parseExpr4
@@ -166,7 +165,7 @@ parseExpr4 = do expr5 <- ParseExpr5
                       return (buildReturn "-" Expr5 expr5b)
                  <|> return expr5
 
-parseExpr5 :: Parse (Expr Name)
+parseExpr5 :: Parser (Expr Name)
 parseExpr5 = do expr6 <- parseExpr6
                 do character "*"
                    expr5 <- parseExpr5
@@ -176,13 +175,17 @@ parseExpr5 = do expr6 <- parseExpr6
                         return (buildReturn "/" expr6 expr6b)
                  <|> return expr6
 
-parseExpr6 :: Parse (Expr Name)
+parseExpr6 :: Parser (Expr Name)
 parseExpr6 = do aexprs <- some parseAExpr
-                return #TODO function to EAp each thing -- #TODO
+                return compAExprs
 
-#TODO distinguish variables from keywords
+-- #TODO distinguish variables from keywords
 coreKeywords = ["in", "of", "let", "where"]
 
-buildReturn Name -> Expr -> Expr -> Expr
+buildReturn :: Name -> Expr -> Expr -> Expr
 buildReturn op e1 e2 = (EAp (EAp (EVar op) e1) e2)
 
+compAexprs :: [AExpr] -> (Expr Name)
+compAexprs (es) = EAp ((last es) (compAExprs (removelast es)))
+
+remlast xs = reverse . tail . reverse xs

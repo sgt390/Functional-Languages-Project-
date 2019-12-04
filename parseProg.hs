@@ -1,6 +1,6 @@
 module ParseProg where
-import Parse
 import Control.Applicative
+import Parse
 
 ----------------------------------------------------------
 -------------- Core Language Syntax definition -----------
@@ -177,7 +177,7 @@ parseExpr5 = do expr6 <- parseExpr6
 
 parseExpr6 :: Parser (Expr Name)
 parseExpr6 = do aexprs <- some parseAExpr
-                return compAExprs
+                return compAExprs aexprs
 
 -- #TODO distinguish variables from keywords
 coreKeywords = ["in", "of", "let", "where"]

@@ -3,7 +3,7 @@ import Parse
 import ParseProg
 
 readF :: IO String
-readF = do inh <- openFile "input.txt" ReadMode
+readF = do inh <- openFile "input0.txt" ReadMode
            prog <- readloop inh
            hClose inh
            return prog
@@ -18,7 +18,7 @@ main = do inp <- readF
 comp :: [( Program Name, Name)] -> Program Name
 comp [] = error "no parse"
 comp [(e, [])] = e
-comp [(x, a)] = error ("doesn't use all input " ++ (show x) ++ "-----" ++ a)
+comp [(x, a)] = error ("doesn't use all input " ++ (show x) ++ ".........." ++ a)
 
 readloop inh = do ineof <- hIsEOF inh
                   if ineof

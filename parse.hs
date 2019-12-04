@@ -113,10 +113,6 @@ integer = token int
 symbol :: String -> Parser String
 symbol xs = token (string xs) -- match the xs symbol
 
--- Operator identifier
---isOperator :: String -> Bool
---isOperator op = elem op ["==", "~=", ">", ">=", "<", "<="]
-
 opIdentifier :: Parser String
 opIdentifier = do s <- symbol "=="
                   return s

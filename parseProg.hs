@@ -58,16 +58,19 @@ parseAlt -  Alter (case)
 --}
 
 
-parseVar :: Parser Name
-parseVar = identifier
+parseVar :: Parser (Expr Name)
+parseVar = do i <- identifier
+              return (EVar i)
 
 character :: Name -> Parser Name
 character xs = symbol xs
 
 
 parseExpr :: Parser (Expr Name)
-parseExpr = do
-              brec <- parseBrec
+parseExpr = do 
+              appl <- parseAppl
+              return (appl)
+           do brec <- parseBrec
               defs <- parseDefs
               character "in"
               expr <- parseExpr
@@ -90,12 +93,12 @@ parseExpr = do
 parseAExpr :: Parser (Expr Name)
 parseAExpr = do v <- parseVar -- var
                 return (EVar v)
-               <|> do n <- integer
-                      return (ENum n)
+               <|> do n <- parseNum
+                      return n
                <|> do character "Pack {"
-                      n0 <- integer
+                      n0 <- parseNum
                       character ","
-                      n1 <- integer
+                      n1 <- parseNum
                       return (EConstr n0 n1)
                <|> do character "("
                       expr <- parseExpr
@@ -138,3 +141,9 @@ parseBrec = do character "letrec"
                return Recursive
                <|> do character "let"
                       return NonRecursive
+
+parseNum :: Parser (Expr ENum)
+parseNum = do num <- integer
+              return (ENum num)
+
+parseAppl :: Parser (Expr TODO)
